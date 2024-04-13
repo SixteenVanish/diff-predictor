@@ -1,0 +1,71 @@
+MODEL:
+    ARCH: "RESNET"
+
+RESNET:
+    # Width of each group (64 -> ResNet; 4 -> ResNeXt).
+    WIDTH_PER_GROUP: 64
+
+MEMORY:
+    DIM_SOURCE_MEM: 256
+    DIM_TARGET_MEM: 256
+    DIM_CROSS_MEM: 256
+    DIM_CROSS_INPUT_PROJ: 256
+
+    RADIUS: 16
+    N_SLOT: 4096
+    N_HEAD: 1
+
+    N_CONCEPT: 4096
+
+    RECON_LOSS_TYPE: 'l2'
+    AVERAGE_DIM: -1
+    USE_INPUT_PROJ: True
+    USE_OUTPUT_PROJ: False
+    NUM_MLP_LAYERS: 2
+    NUM_MLP_LAYERS_IN: 2
+    NUM_MLP_LAYERS_OUT: 1
+
+    USE_SRC_RECON: False
+    USE_TAR_RECON: False
+    USE_ALIGN: False
+    KL_T: -2.
+
+    USE_SOURCE_MEM_CONTRASTIVE: False
+    USE_TARGET_MEM_CONTRASTIVE: False
+    USE_CROSS_MEM_CONTRASTIVE: False
+
+    ADDRESS_TYPE: "dot"
+    PREDICT_RESIDUAL: False
+    
+
+    USE_GAUSSIAN_MEMORY: False
+    USE_GAUSSIAN_KL: False
+    GAUSSIAN_NORMAL: False
+
+    USE_SPARSE: False
+    USE_SPARSE_BEFORE: False
+    SPARSE_LOSS_TYPE: 'topk'
+    SPARSE_TOPK: 100
+
+    # loss weight
+    LOSS_TARGET_MEM_CONTRASTIVE: 0.
+    LOSS_SOURCE_MEM_CONTRASTIVE: 0.
+
+    LOSS_SOURCE_RECON: 0.1
+    LOSS_TARGET_RECON: 0.1
+
+    LOSS_SOURCE_MEM_SPARSE: 0.
+    LOSS_TARGET_MEM_SPARSE: 0.
+
+    LOSS_PREDICT: 1.
+    LOSS_KL: 0.
+    LOSS_GAUSSIAN_KL: 0.
+    NORM_MEM: False
+    NORM_INPUT: False
+    RECON_TYPE: 'mlp_v1'
+
+    # Type of the structure of the predictor, memory for the key-value memory enhanced predictor and mlp for the mlp predictor
+    CROSS_BRANCH_TYPE: 'memory'
+    DINO_TEMP_T: 0.05  # Temperature for target in DINO loss
+    DINO_TEMP_S: 0.05  # Temperature for source in DINO loss
+
