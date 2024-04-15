@@ -3,10 +3,10 @@ _base_ = [
     '../../_base_/default_runtime.py'
 ]
 
-checkpoint = "../diff-ijepa/logs/vitb16.224-8xb256-100e_in1k/jepa-ep100_.pth.tar"
-work_dir = "./work_dirs/in1k/ijepa/vitb16.224-8xb256-100e_in1k/linear"
-# checkpoint = "../diff-ijepa/logs/vitb16.224-8xb256-100e_in1k_diff-3x0cos-1e-4noisemse-uniformT/jepa-ep100_.pth.tar"
-# work_dir = "./work_dirs/in1k/ijepa/vitb16.224-8xb256-100e_in1k_diff-3x0cos-1e-4noisemse-uniformT/linear"
+# checkpoint = "../diff-ijepa/logs/vitb16.224-8xb256-100e_in1k/jepa-ep100_.pth.tar"
+# work_dir = "./work_dirs/in1k/ijepa/vitb16.224-8xb256-100e_in1k/linear"
+checkpoint = "../diff-ijepa/logs/vitb16.224-8xb256-100e_in1k_diff-3x0cos-1e-4noisemse-uniformT/jepa-ep100_.pth.tar"
+work_dir = "./work_dirs/in1k/ijepa/vitb16.224-8xb256-100e_in1k_diff-3x0cos-1e-4noisemse-uniformT/linear"
 
 auto_scale_lr = dict(base_batch_size=16384, enable=True)
 

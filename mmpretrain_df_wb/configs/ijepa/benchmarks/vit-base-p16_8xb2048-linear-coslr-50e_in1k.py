@@ -24,7 +24,7 @@ model = dict(
         patch_size=16,
         frozen_stages=12,
         out_type='raw',
-        init_cfg=dict(type='Pretrained', checkpoint=checkpoint, prefix='encoder.')),
+        init_cfg=dict(type='Pretrained', checkpoint=checkpoint, prefix='backbone.')),
     neck=dict(type='GlobalAveragePooling', dim=1),
     head=dict(
         type='LinearClsHead',
