@@ -40,7 +40,8 @@ model = dict(
             prefix='backbone.')))
 
 default_hooks = dict(
-    checkpoint=dict(type='CheckpointHook', interval=10, max_keep_ckpts=3))
+    checkpoint=dict(type='CheckpointHook', interval=10, max_keep_ckpts=3),
+    logger=dict(type='LoggerHook', interval=100))
 env_cfg = dict(
     cudnn_benchmark=False,
     dist_cfg=dict(backend='nccl'),

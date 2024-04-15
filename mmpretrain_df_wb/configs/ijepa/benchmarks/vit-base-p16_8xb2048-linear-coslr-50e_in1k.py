@@ -52,6 +52,11 @@ test_cfg = dict()
 
 default_hooks = dict(
     checkpoint=dict(type='CheckpointHook', interval=1, max_keep_ckpts=3),
-    logger=dict(type='LoggerHook', interval=10))
+    logger=dict(type='LoggerHook', interval=100))
 
 randomness = dict(seed=0, diff_rank_seed=True)
+
+env_cfg = dict(
+    cudnn_benchmark=False,
+    mp_cfg=dict(mp_start_method='spawn', opencv_num_threads=5),
+    dist_cfg=dict(backend='nccl'))

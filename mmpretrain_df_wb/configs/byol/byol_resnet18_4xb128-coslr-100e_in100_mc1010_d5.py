@@ -136,6 +136,7 @@ train_cfg = dict(type='EpochBasedTrainLoop', max_epochs=100)
 # only keeps the latest 3 checkpoints
 default_hooks = dict(
     checkpoint=dict(max_keep_ckpts=3, interval=10),
+    logger=dict(type='LoggerHook', interval=100),
     )
 # NOTE: `auto_scale_lr` is for automatically scaling LR
 # based on the actual training batch size.
