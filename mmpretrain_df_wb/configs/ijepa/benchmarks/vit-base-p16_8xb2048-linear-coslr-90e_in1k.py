@@ -24,7 +24,7 @@ model = dict(
         patch_size=16,
         frozen_stages=12,
         out_type='raw',
-        init_cfg=dict(type='Pretrained', checkpoint=checkpoint, prefix='encoder.')),
+        init_cfg=dict(type='Pretrained', checkpoint=checkpoint, prefix='backbone.')),
     neck=dict(type='GlobalAveragePooling', dim=1),
     head=dict(
         type='LinearClsHead',
@@ -52,6 +52,6 @@ test_cfg = dict()
 
 default_hooks = dict(
     checkpoint=dict(type='CheckpointHook', interval=1, max_keep_ckpts=3),
-    logger=dict(type='LoggerHook', interval=10))
+    logger=dict(type='LoggerHook', interval=100))
 
 randomness = dict(seed=0, diff_rank_seed=True)
