@@ -1,2 +1,3 @@
 docs/** linguist-documentation
 docs_zh-CN/** linguist-documentation
+diff-ijepa/logs/vitb16.224-8xb256-600e_in1k/jepa-ep600_.pth.tar filter=lfs diff=lfs merge=lfs -text
