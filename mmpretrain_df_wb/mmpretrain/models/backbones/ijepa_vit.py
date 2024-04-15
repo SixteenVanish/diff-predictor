@@ -165,8 +165,8 @@ class ijepa_vit(BaseModule):
 
         if not (isinstance(self.init_cfg, dict)
                 and self.init_cfg['type'] == 'Pretrained'):
-            # if self.pos_embed is not None:
-            #     trunc_normal_(self.pos_embed, std=0.02)
+            if self.pos_embed is not None:
+                trunc_normal_(self.pos_embed, std=0.02)
             self.apply(self._init_weights)
             self.fix_init_weight()
             
@@ -240,7 +240,7 @@ class ijepa_vit(BaseModule):
             if i in self.out_indices:
                 x = x.permute(0, 2, 1)
                 outs.append(x)
-        
+                
         return tuple(outs)    # [num_patches,embed_dim]
 
     
