@@ -4,6 +4,9 @@ _base_ = [
     '../../_base_/default_runtime.py'
 ]
 
+checkpoint = "../diff-ijepa/logs/vitb16.224-8xb256-100e_in1k/jepa-ep100_.pth.tar"
+work_dir = "./work_dirs/in1k/ijepa/vitb16.224-8xb256-100e_in1k/linear_coslr"
+
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
@@ -42,30 +45,29 @@ test_pipeline = [
     dict(type='PackInputs')
 ]
 
-train_dataloader = dict(batch_size=128, dataset=dict(pipeline=train_pipeline))
-val_dataloader = dict(batch_size=128, dataset=dict(pipeline=test_pipeline))
+data_root = "/ssd/datasets/imagenet"
+train_dataloader = dict(batch_size=256, dataset=dict(pipeline=train_pipeline, data_root=data_root))
+val_dataloader = dict(batch_size=256, dataset=dict(pipeline=test_pipeline, data_root=data_root))
 test_dataloader = val_dataloader
 
 # model settings
 model = dict(
     type='ImageClassifier',
     backbone=dict(
-        type='VisionTransformer',
+        type='ijepa_vit',
         arch='base',
-        img_size=224,
+        img_size=[224],
         patch_size=16,
-        drop_path_rate=0.1,
-        out_type='avg_featmap',
-        final_norm=False,
-        init_cfg=dict(type='Pretrained', checkpoint='', prefix='backbone.')),
-    neck=None,
+        frozen_stages=12,
+        out_type='raw',
+        init_cfg=dict(type='Pretrained', checkpoint=checkpoint, prefix='backbone.')),
+    neck=dict(type='GlobalAveragePooling', dim=1),
     head=dict(
         type='LinearClsHead',
         num_classes=1000,
         in_channels=768,
-        loss=dict(
-            type='LabelSmoothLoss', label_smooth_val=0.1, mode='original'),
-        init_cfg=[dict(type='TruncNormal', layer='Linear', std=2e-5)]),
+        loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
+        topk=(1, 5)),
     train_cfg=dict(augments=[
         dict(type='Mixup', alpha=0.8),
         dict(type='CutMix', alpha=1.0)

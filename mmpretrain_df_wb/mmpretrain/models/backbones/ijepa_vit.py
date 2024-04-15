@@ -126,7 +126,8 @@ class ijepa_vit(BaseModule):
         qkv_bias=self.arch_settings['qkv_bias']
         norm_layer=self.arch_settings['norm_layer']
         self.frozen_stages = frozen_stages
-        
+        self.depth = depth
+
         self.num_features = self.embed_dim = embed_dim
         self.num_heads = num_heads
         # --
@@ -259,6 +260,43 @@ class ijepa_vit(BaseModule):
         )
         pos_embed = pos_embed.permute(0, 2, 3, 1).view(1, -1, dim)
         return torch.cat((class_emb.unsqueeze(0), pos_embed), dim=1)
+    
+
+    def get_layer_depth(self, param_name: str, prefix: str = ''):
+        """Get the layer-wise depth of a parameter.
+
+        Args:
+            param_name (str): The name of the parameter.
+            prefix (str): The prefix for the parameter.
+                Defaults to an empty string.
+
+        Returns:
+            Tuple[int, int]: The layer-wise depth and the num of layers.
+
+        Note:
+            The first depth is the stem module (``layer_depth=0``), and the
+            last depth is the subsequent module (``layer_depth=num_layers-1``)
+        """
+        num_layers = self.depth + 2
+
+        if not param_name.startswith(prefix):
+            # For subsequent module like head
+            return num_layers - 1, num_layers
+
+        param_name = param_name[len(prefix):]
+
+        if param_name in ('cls_token', 'pos_embed'):
+            layer_depth = 0
+        elif param_name.startswith('patch_embed'):
+            layer_depth = 0
+        elif param_name.startswith('blocks'):
+            layer_id = int(param_name.split('.')[1])
+            layer_depth = layer_id + 1
+        else:
+            layer_depth = num_layers - 1
+
+        print("layer_depth, num_layers ", layer_depth, num_layers)
+        return layer_depth, num_layers
 
 
 def get_2d_sincos_pos_embed(embed_dim, grid_size, cls_token=False):
