@@ -4,7 +4,9 @@ _base_ = [
 ]
 
 checkpoint = "../diff-ijepa/logs/vitb16.224-8xb256-100e_in1k/jepa-ep100_.pth.tar"
-work_dir = "./work_dirs/in1k/ijepa/vitb16.224-8xb256-100e_in1k/linear_v3"
+work_dir = "./work_dirs/in1k/ijepa/vitb16.224-8xb256-100e_in1k/linear"
+resume = True
+load_from = "./work_dirs/in1k/ijepa/vitb16.224-8xb256-100e_in1k/linear/epoch_34.pth"
 # checkpoint = "../diff-ijepa/logs/vitb16.224-8xb256-100e_in1k_diff-3x0cos-1e-4noisemse-uniformT/jepa-ep100_.pth.tar"
 # work_dir = "./work_dirs/in1k/ijepa/vitb16.224-8xb256-100e_in1k_diff-3x0cos-1e-4noisemse-uniformT/linear"
 
@@ -23,8 +25,6 @@ model = dict(
     backbone=dict(
         type='ijepa_vit',
         arch='base',
-        out_indices=[-4,-3,-2,-1],
-        
         img_size=[224],
         patch_size=16,
         frozen_stages=12,

@@ -16,19 +16,19 @@ class Decoder(nn.Module):
             self.fc = nn.Linear(self.cfg.input_dim, self.cfg.fc_channel * self.cfg.fc_size * self.cfg.fc_size)
 
         self.decoder = nn.Sequential(
-            nn.Conv2d(self.cfg.fc_channel, 32, kernel_size=1, stride=1, padding=0),    # [128, fc_size, fc_size]
-            nn.BatchNorm2d(32),
-            nn.ReLU(),
-            nn.Upsample(size=[self.cfg.map_size_list[0], self.cfg.map_size_list[0]], mode='bilinear', align_corners=True),  # [128, map_dim0, map_dim0]
-            nn.Conv2d(32, 16, kernel_size=3, stride=1, padding=1),     # [32, map_dim0, map_dim0]
+            nn.Conv2d(self.cfg.fc_channel, 16, kernel_size=1, stride=1, padding=0),    # [128, fc_size, fc_size]
             nn.BatchNorm2d(16),
             nn.ReLU(),
-            nn.Upsample(size=[self.cfg.map_size_list[1], self.cfg.map_size_list[1]], mode='bilinear', align_corners=True),  # [32, map_dim1, map_dim1]
-            nn.Conv2d(16, 8, kernel_size=3, stride=1, padding=1),      # [12, map_dim1, map_dim1]
+            nn.Upsample(size=[self.cfg.map_size_list[0], self.cfg.map_size_list[0]], mode='bilinear', align_corners=True),  # [128, map_dim0, map_dim0]
+            nn.Conv2d(16, 8, kernel_size=3, stride=1, padding=1),     # [32, map_dim0, map_dim0]
             nn.BatchNorm2d(8),
             nn.ReLU(),
+            nn.Upsample(size=[self.cfg.map_size_list[1], self.cfg.map_size_list[1]], mode='bilinear', align_corners=True),  # [32, map_dim1, map_dim1]
+            nn.Conv2d(8, 4, kernel_size=3, stride=1, padding=1),      # [12, map_dim1, map_dim1]
+            nn.BatchNorm2d(4),
+            nn.ReLU(),
             nn.Upsample(size=[self.cfg.map_size_list[2], self.cfg.map_size_list[2]], mode='bilinear', align_corners=True),   # [12, map_dim2, map_dim2]
-            nn.Conv2d(8, 3, kernel_size=3, stride=1, padding=1),       # [3, map_dim2=64/224/448, map_dim2=64/224/448]
+            nn.Conv2d(4, 3, kernel_size=3, stride=1, padding=1),       # [3, map_dim2=64/224/448, map_dim2=64/224/448]
             nn.Sigmoid(),
         )
 

@@ -11,6 +11,8 @@ import torch.distributions as dist
 from mmengine.model import BaseModule
 from mmpretrain.registry import MODELS
 
+from ..utils import build_norm_layer
+
 from .ijepa_utils import (
     trunc_normal_,
     apply_masks
@@ -157,6 +159,8 @@ class ijepa_vit(BaseModule):
         # self.apply(self._init_weights)
         # self.fix_init_weight()
 
+        if self.out_type == 'avg_featmap':
+            self.ln2 = build_norm_layer(dict(type='LN', eps=1e-6), self.embed_dim)
         # freeze stages only when self.frozen_stages > 0
         if self.frozen_stages > 0:
             self._freeze_stages()
@@ -212,7 +216,14 @@ class ijepa_vit(BaseModule):
             m.eval()
             for param in m.parameters():
                 param.requires_grad = False
-    
+                
+        # freeze the last layer norm
+        if self.frozen_stages == len(self.blocks):
+            if self.out_type == 'avg_featmap':
+                self.ln2.eval()
+                for param in self.ln2.parameters():
+                    param.requires_grad = False
+        
     def forward(self, x, masks=None):
         if masks is not None:
             if not isinstance(masks, list):
@@ -239,12 +250,30 @@ class ijepa_vit(BaseModule):
                 x = self.norm(x)
             
             if i in self.out_indices:
-                x = x.permute(0, 2, 1)
-                outs.append(x)
-                
-        return tuple(outs)    # [num_patches,embed_dim]
+                outs.append(self._format_output(x))
+             
+        if self.out_type == 'raw':
+            outs = [x.permute(0, 2, 1) for x in outs]   # [bsz, embed_dim, num_patches]
+            outs = torch.cat(outs, dim=2)   # [bsz, embed_dim, num_patches * n]
+            outs = [outs]
+        
+        return tuple(outs)    
 
-    
+    def _format_output(self, x):
+        if self.out_type == 'raw':
+            return x
+        if self.out_type == 'cls_token':
+            return x[:, 0]
+
+        # patch_token = x[:, self.num_extra_tokens:]
+        patch_token = x
+        # if self.out_type == 'featmap':
+        #     B = x.size(0)
+        #     # (B, N, C) -> (B, H, W, C) -> (B, C, H, W)
+        #     return patch_token.reshape(B, *hw, -1).permute(0, 3, 1, 2)
+        if self.out_type == 'avg_featmap':
+            return self.ln2(patch_token.mean(dim=1))
+        
     def interpolate_pos_encoding(self, x, pos_embed):
         npatch = x.shape[1] - 1
         N = pos_embed.shape[1] - 1

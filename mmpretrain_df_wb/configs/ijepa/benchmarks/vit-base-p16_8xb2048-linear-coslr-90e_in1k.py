@@ -4,8 +4,9 @@ _base_ = [
     '../../_base_/default_runtime.py'
 ]
 
-checkpoint = "../diff-ijepa/logs/vitb16.224-8xb256-100e_in1k/jepa-ep100_.pth.tar"
-work_dir = "./work_dirs/in1k/ijepa/vitb16.224-8xb256-100e_in1k/linear_coslr"
+# 参考mae
+checkpoint = "../diff-ijepa/logs/vitb16.224-8xb256-600e_in1k/jepa-ep600_.pth.tar"
+work_dir = "./work_dirs/in1k/ijepa/vitb16.224-8xb256-600e_in1k/linear_followMAE"
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
@@ -46,8 +47,8 @@ test_pipeline = [
 ]
 
 data_root = "/ssd/datasets/imagenet"
-train_dataloader = dict(batch_size=256, dataset=dict(pipeline=train_pipeline, data_root=data_root))
-val_dataloader = dict(batch_size=256, dataset=dict(pipeline=test_pipeline, data_root=data_root))
+train_dataloader = dict(batch_size=2048, dataset=dict(pipeline=train_pipeline, data_root=data_root))
+val_dataloader = dict(batch_size=2048, dataset=dict(pipeline=test_pipeline, data_root=data_root))
 test_dataloader = val_dataloader
 
 # model settings
@@ -60,7 +61,7 @@ model = dict(
         patch_size=16,
         frozen_stages=12,
         out_type='raw',
-        init_cfg=dict(type='Pretrained', checkpoint=checkpoint, prefix='backbone.')),
+        init_cfg=dict(type='Pretrained', checkpoint=checkpoint, prefix='target_encoder.')),
     neck=dict(type='GlobalAveragePooling', dim=1),
     head=dict(
         type='LinearClsHead',
@@ -71,46 +72,45 @@ model = dict(
     train_cfg=dict(augments=[
         dict(type='Mixup', alpha=0.8),
         dict(type='CutMix', alpha=1.0)
-    ]))
+    ]) 
+    )
 
-# optimizer wrapper
+# optimizer v2change
 optim_wrapper = dict(
-    optimizer=dict(
-        type='AdamW', lr=2e-3, weight_decay=0.05, betas=(0.9, 0.999)),
-    constructor='LearningRateDecayOptimWrapperConstructor',
-    paramwise_cfg=dict(
-        layer_decay_rate=0.65,
-        custom_keys={
-            '.ln': dict(decay_mult=0.0),
-            '.bias': dict(decay_mult=0.0),
-            '.cls_token': dict(decay_mult=0.0),
-            '.pos_embed': dict(decay_mult=0.0)
-        }))
+    _delete_=True,
+    type='AmpOptimWrapper',
+    optimizer=dict(type='LARS', lr=6.4, weight_decay=0.0, momentum=0.9))
 
-# learning rate scheduler
+# learning rate scheduler v2change
 param_scheduler = [
     dict(
         type='LinearLR',
         start_factor=1e-4,
         by_epoch=True,
         begin=0,
-        end=5,
+        end=10,
         convert_to_iter_based=True),
     dict(
         type='CosineAnnealingLR',
-        T_max=95,
+        T_max=80,
         by_epoch=True,
-        begin=5,
-        end=100,
-        eta_min=1e-6,
+        begin=10,
+        end=90,
+        eta_min=0.0,
         convert_to_iter_based=True)
 ]
+
+# runtime settings v2change
+train_cfg = dict(by_epoch=True, max_epochs=90)
 
 # runtime settings
 default_hooks = dict(
     # save checkpoint per epoch.
     checkpoint=dict(type='CheckpointHook', interval=1, max_keep_ckpts=3))
 
-train_cfg = dict(by_epoch=True, max_epochs=100)
-
 randomness = dict(seed=0, diff_rank_seed=True)
+
+env_cfg = dict(
+    cudnn_benchmark=False,
+    mp_cfg=dict(mp_start_method='spawn', opencv_num_threads=5),
+    dist_cfg=dict(backend='nccl'))

@@ -15,8 +15,11 @@ from .nonlinear_neck import NonLinearNeck
 from .simmim_neck import SimMIMLinearDecoder
 from .spark_neck import SparKLightDecoder
 from .swav_neck import SwAVNeck
+from .ijepa_gap import IjepaGlobalAveragePooling
 
 __all__ = [
+    'IjepaGlobalAveragePooling',
+    
     'GlobalAveragePooling',
     'GeneralizedMeanPooling',
     'HRFuseScales',
